@@ -1,0 +1,18 @@
+ ☐ tests
+
+
+docs:
+  ☐ Docstrings for NormalInverseGamma
+  ☐ Run some sort of rtd on this.
+
+
+Match jl interface:
+ ☐ mgf
+ ☐ cf
+ ☐ insupport
+ ☐ succprob/failprob (where appropriate)
+ ☐ Stuff from Parameter Retrieval section
+
+
+Match scipy interface:
+  ☐ Go through and determine methods we still need

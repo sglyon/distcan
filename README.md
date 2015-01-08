@@ -1,2 +1,3 @@
-# Distributions.py
-Probability distributions for python in their canonical form
+# distcan
+
+Probability **dist**ributions for python in their **can**onical form
