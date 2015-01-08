@@ -106,20 +106,6 @@ For applicable distributions, equivalent to calling `p__dist_name(x,
 
 """
 
-median_docstr = r"""
-Compute the median of the distribution
-
-Parameters
-----------
-None
-
-Returns
--------
-out : scalar
-    The median of the distribution
-
-"""
-
 rvs_docstr = r"""
 Draw random samples from the distribution
 
@@ -337,13 +323,134 @@ For applicable distributions, equivalent to calling `q__dist_name(x,
 
 """
 
+univariate_class_docstr = r"""
+Construct a {name} random variable. The pdf of the random variable is
+given by
+
+.. math::
+
+    {pdf_tex}
+
+Parameters
+----------
+{param_list}
+
+Attributes
+----------
+{specific_attributes}
+mean :  scalar(float)
+    mean of the distribution
+std :  scalar(float)
+    std of the distribution
+var :  scalar(float)
+    var of the distribution
+skewness :  scalar(float)
+    skewness of the distribution
+kurtosis :  scalar(float)
+    kurtosis of the distribution
+median :  scalar(float)
+    median of the distribution
+mode :  scalar(float)
+    mode of the distribution
+isplatykurtic :  Boolean
+    boolean indicating if d.kurtosis > 0
+isleptokurtic :  bool
+    boolean indicating if d.kurtosis < 0
+ismesokurtic :  bool
+    boolean indicating if d.kurtosis == 0
+entropy :  scalar(float)
+    entropy value of the distribution
+
+"""
+
 default_docstr_args = {"pdf_tex": r"\text{not given}",
                        "cdf_tex": r"\text{not given}",
                        "arg1_type": "array_like or scalar",
                        "ret1_type": "array_like or scalar"}
 
 
+def update_docstring(name, olddoc):
+    # make sure it has a docstring
+    if olddoc is None:
+        return None
+
+    # new docstring
+    prefix = "%s: " % name
+    if len(olddoc.split(": ")) > 1:
+        newdoc = prefix + olddoc.split(": ")[1]
+    else:
+        newdoc = prefix + olddoc
+
+    return newdoc
+
+
+# Metaclass to re-write docstrings
+class RewriteDocstringMeta(type):
+    """
+    Modify docstrings to be prefixed with 'classname: '.
+
+    To do this, we intercede before the class is created and modify the
+    docstrings of its attributes.
+
+    This will not affect inherited methods, however, so we also need to
+    loop through the parent classes. We cannot simply modify the
+    docstrings, because then the parent classes' methods will have the
+    wrong docstring. Instead, we must actually copy the functions, and
+    then modify the docstring.
+
+    """
+    def __new__(cls, name, parents, attrs):
+
+        for attr_name in attrs:
+            # skip special methods
+            if attr_name.startswith("__"):
+                continue
+
+            # skip non-functions
+            attr = attrs[attr_name]
+            if not hasattr(attr, '__call__'):
+                continue
+
+            # update docstring
+            attr.__doc__ = update_docstring(name, attr.__doc__)
+
+        for parent in parents:
+            for attr_name in dir(parent):
+
+                # we already have this method
+                if attr_name in attrs:
+                    continue
+
+                # skip special methods
+                if attr_name.startswith("__"):
+                    continue
+
+                # get the original function and copy it
+                a = getattr(parent, attr_name)
+
+                # skip non-functions
+                if not hasattr(a, '__call__'):
+                    continue
+
+                # copy function
+                f = a.__func__
+                attr = type(f)(
+                    f.func_code, f.func_globals, f.func_name,
+                    f.func_defaults, f.func_closure)
+                doc = f.__doc__
+
+                # update docstring and add attr
+                attr.__doc__ = update_docstring(name, doc)
+                attrs[attr_name] = attr
+
+        # create the class
+        obj = super(RewriteDocstringMeta, cls).__new__(
+            cls, name, parents, attrs)
+        return obj
+
+
 class CanDistFromScipy(object):
+    "This is a foobar object"
 
     def __init__(self):
 
@@ -353,7 +460,6 @@ class CanDistFromScipy(object):
         self.logpdf = self.dist.logpdf
         self.cdf = self.dist.cdf
         self.logcdf = self.dist.logcdf
-        self.median = self.dist.median
         self.rvs = self.dist.rvs
 
         # survival function. Called the complementary cumulative
@@ -367,6 +473,7 @@ class CanDistFromScipy(object):
 
         # set docstrings
         self._set_docstrings()
+        self.__doc__ = "foobar"
 
     def _set_docstrings(self):
         fmt_args = default_docstr_args.copy()  # copy so ready for next use
@@ -377,7 +484,6 @@ class CanDistFromScipy(object):
         self.logpdf.__func__.__doc__ = logpdf_docstr.format(**fmt_args)
         self.cdf.__func__.__doc__ = cdf_docstr.format(**fmt_args)
         self.logcdf.__func__.__doc__ = logcdf_docstr.format(**fmt_args)
-        self.median.__func__.__doc__ = median_docstr  # no formatting needed
         self.rvs.__func__.__doc__ = rvs_docstr.format(**fmt_args)
 
         # survival function stuff
@@ -406,11 +512,11 @@ class CanDistFromScipy(object):
 
     @property
     def mean(self):
-        return float(self.dist.stats(moments="m"))
+        return self.dist.stats(moments="m")
 
     @property
     def var(self):
-        return float(self.dist.stats(moments="v"))
+        return self.dist.stats(moments="v")
 
     @property
     def std(self):
@@ -418,15 +524,19 @@ class CanDistFromScipy(object):
 
     @property
     def skewness(self):
-        return float(self.dist.stats(moments="s"))
+        return self.dist.stats(moments="s")
 
     @property
     def kurtosis(self):
-        return float(self.dist.stats(moments="k"))
+        return self.dist.stats(moments="k")
+
+    @property
+    def median(self):
+        return self.dist.median()
 
     @property
     def mode(self):
-        return float(self.dist.ppf(0.5))
+        return self.dist.ppf(0.5)
 
     @property
     def isplatykurtic(self):
