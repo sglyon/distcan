@@ -15,4 +15,4 @@ Match jl interface:
 
 
 Match scipy interface:
-  ☐ Go through and determine methods we still need
+  ☐ figure out how to deal with fit and expect

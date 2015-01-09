@@ -44,7 +44,7 @@ Evaluate the log of the pdf, where the pdf is defined as
 Parameters
 ----------
 x : {arg1_type}
-    The point(s) at which to evaluate the pdf
+    The point(s) at which to evaluate the log of the pdf
 
 Returns
 -------
@@ -68,7 +68,7 @@ Evaluate the cumulative density function
 Parameters
 ----------
 x : {arg1_type}
-    The point(s) at which to evaluate the pdf
+    The point(s) at which to evaluate the cdf
 
 Returns
 -------
@@ -92,7 +92,7 @@ Evaluate the log of the cdf, where the cdf is defined as
 Parameters
 ----------
 x : {arg1_type}
-    The point(s) at which to evaluate the cdf
+    The point(s) at which to evaluate the log of the cdf
 
 Returns
 -------
@@ -323,134 +323,25 @@ For applicable distributions, equivalent to calling `q__dist_name(x,
 
 """
 
-univariate_class_docstr = r"""
-Construct a {name} random variable. The pdf of the random variable is
-given by
-
-.. math::
-
-    {pdf_tex}
-
-Parameters
-----------
-{param_list}
-
-Attributes
-----------
-{specific_attributes}
-mean :  scalar(float)
-    mean of the distribution
-std :  scalar(float)
-    std of the distribution
-var :  scalar(float)
-    var of the distribution
-skewness :  scalar(float)
-    skewness of the distribution
-kurtosis :  scalar(float)
-    kurtosis of the distribution
-median :  scalar(float)
-    median of the distribution
-mode :  scalar(float)
-    mode of the distribution
-isplatykurtic :  Boolean
-    boolean indicating if d.kurtosis > 0
-isleptokurtic :  bool
-    boolean indicating if d.kurtosis < 0
-ismesokurtic :  bool
-    boolean indicating if d.kurtosis == 0
-entropy :  scalar(float)
-    entropy value of the distribution
-
-"""
-
 default_docstr_args = {"pdf_tex": r"\text{not given}",
                        "cdf_tex": r"\text{not given}",
                        "arg1_type": "array_like or scalar",
                        "ret1_type": "array_like or scalar"}
 
 
-def update_docstring(name, olddoc):
-    # make sure it has a docstring
-    if olddoc is None:
-        return None
-
-    # new docstring
-    prefix = "%s: " % name
-    if len(olddoc.split(": ")) > 1:
-        newdoc = prefix + olddoc.split(": ")[1]
-    else:
-        newdoc = prefix + olddoc
-
-    return newdoc
+def _default_fit(self, x):
+    msg = "If you would like to see this open an issue or submit a pull"
+    msg += " request at https://github.com/spencerlyon2/distcan/issues"
+    raise NotImplementedError(msg)
 
 
-# Metaclass to re-write docstrings
-class RewriteDocstringMeta(type):
-    """
-    Modify docstrings to be prefixed with 'classname: '.
-
-    To do this, we intercede before the class is created and modify the
-    docstrings of its attributes.
-
-    This will not affect inherited methods, however, so we also need to
-    loop through the parent classes. We cannot simply modify the
-    docstrings, because then the parent classes' methods will have the
-    wrong docstring. Instead, we must actually copy the functions, and
-    then modify the docstring.
-
-    """
-    def __new__(cls, name, parents, attrs):
-
-        for attr_name in attrs:
-            # skip special methods
-            if attr_name.startswith("__"):
-                continue
-
-            # skip non-functions
-            attr = attrs[attr_name]
-            if not hasattr(attr, '__call__'):
-                continue
-
-            # update docstring
-            attr.__doc__ = update_docstring(name, attr.__doc__)
-
-        for parent in parents:
-            for attr_name in dir(parent):
-
-                # we already have this method
-                if attr_name in attrs:
-                    continue
-
-                # skip special methods
-                if attr_name.startswith("__"):
-                    continue
-
-                # get the original function and copy it
-                a = getattr(parent, attr_name)
-
-                # skip non-functions
-                if not hasattr(a, '__call__'):
-                    continue
-
-                # copy function
-                f = a.__func__
-                attr = type(f)(
-                    f.func_code, f.func_globals, f.func_name,
-                    f.func_defaults, f.func_closure)
-                doc = f.__doc__
-
-                # update docstring and add attr
-                attr.__doc__ = update_docstring(name, doc)
-                attrs[attr_name] = attr
-
-        # create the class
-        obj = super(RewriteDocstringMeta, cls).__new__(
-            cls, name, parents, attrs)
-        return obj
+def _default_expect(self, x):
+    msg = "If you would like to see this open an issue or submit a pull"
+    msg += " request at https://github.com/spencerlyon2/distcan/issues"
+    raise NotImplementedError(msg)
 
 
 class CanDistFromScipy(object):
-    "This is a foobar object"
 
     def __init__(self):
 
@@ -461,6 +352,19 @@ class CanDistFromScipy(object):
         self.cdf = self.dist.cdf
         self.logcdf = self.dist.logcdf
         self.rvs = self.dist.rvs
+        self.moment = self.dist.moment
+        self.stats = self.dist.stats
+
+        # not all distributions have the following: fit, expect
+        if hasattr(self.dist, "fit"):
+            self.fit = self.dist.fit
+        else:
+            self.fit = _default_fit
+
+        if hasattr(self.dist, "expect"):
+            self.expect = self.dist.expect
+        else:
+            self.fit = _default_expect
 
         # survival function. Called the complementary cumulative
         # function (ccdf) in .jl
@@ -477,7 +381,7 @@ class CanDistFromScipy(object):
 
     def _set_docstrings(self):
         fmt_args = default_docstr_args.copy()  # copy so ready for next use
-        fmt_args.update(self._docstr_args)  # pull in data from subclass
+        fmt_args.update(self._metadata)  # pull in data from subclass
 
         # define docstrings
         self.pdf.__func__.__doc__ = pdf_docstr.format(**fmt_args)
@@ -505,7 +409,7 @@ class CanDistFromScipy(object):
         self.invlogccdf.__func__.__doc__ = invlccdf_docstr.format(**fmt_args)
 
     def __str__(self):
-        return self._str % (self.params)
+        return self._metadata["_str"] % (self.params)
 
     def __repr__(self):
         return self.__str__()

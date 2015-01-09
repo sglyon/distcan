@@ -7,7 +7,7 @@ distcan: Probability distributions for python in their canonical form
 """
 __version__ = 0.1
 
-from multivariate import *
-from univariate import *
-from matrix import *
-from scipy_wrap import *
+from .multivariate import *
+from .univariate import *
+from .matrix import *
+from .scipy_wrap import *
