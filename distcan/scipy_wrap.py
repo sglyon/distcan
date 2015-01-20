@@ -303,7 +303,7 @@ For applicable distributions, equivalent to calling `q__dist_name(x,
 """
 
 invlccdf_docstr = r"""
-Evaluate inverse function of the logcdf of the distribution at x
+Evaluate inverse function of the logccdf of the distribution at x
 
 Parameters
 ----------

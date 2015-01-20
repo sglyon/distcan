@@ -97,6 +97,7 @@ def _create_class_docstr(name, param_names, param_descrs,
 class InverseGamma(CanDistFromScipy):
 
     _metadata = {
+        "name": "InverseGamma",
         "pdf_tex": (r"p(x;\alpha,\beta)=\frac{\beta^{\alpha}}{\Gamma(\alpha)}"
                     + r"x^{-\alpha-1}\exp\left(-\frac{\beta}{x}\right)"),
 
@@ -110,7 +111,7 @@ class InverseGamma(CanDistFromScipy):
         "_str": "InverseGamma(alpha=%.5f, beta=%.5f)"}
 
     # set docstring
-    __doc__ = _create_class_docstr("InverseGamma", **_metadata)
+    __doc__ = _create_class_docstr(**_metadata)
 
     def __init__(self, alpha, beta):
         self.alpha = alpha
@@ -133,6 +134,7 @@ class InverseGamma(CanDistFromScipy):
 class Normal(CanDistFromScipy):
 
     _metadata = {
+        "name": "Normal",
         "pdf_tex": (r"p(x;\mu,\sigma)=\frac{1}{\sigma \sqrt{2\pi}}" +
                     r"e^{-\frac{(x-\mu)^2}{2\sigma^2}}"),
 
@@ -147,7 +149,7 @@ class Normal(CanDistFromScipy):
         "_str": "Normal(mu=%.5f, sigma=%.5f)"}
 
     # set docstring
-    __doc__ = _create_class_docstr("Normal", **_metadata)
+    __doc__ = _create_class_docstr(**_metadata)
 
     def __init__(self, mu, sigma):
         self.mu = mu
@@ -169,6 +171,7 @@ class Normal(CanDistFromScipy):
 class Gamma(CanDistFromScipy):
 
     _metadata = {
+        "name": "Gamma",
         "pdf_tex": (r"p(x;\alpha,\beta)=\frac{x^{\alpha-1}e^{-x/\beta}}" +
                     r"{\Gamma(\alpha)\beta^{\alpha}}"),
 
@@ -183,7 +186,7 @@ class Gamma(CanDistFromScipy):
         "_str": "Gamma(alpha=%.5f, beta=%.5f)"}
 
     # set docstring
-    __doc__ = _create_class_docstr("InverseGamma", **_metadata)
+    __doc__ = _create_class_docstr(**_metadata)
 
     def __init__(self, alpha, beta):
         self.alpha = alpha
