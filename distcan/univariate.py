@@ -201,6 +201,45 @@ class Gamma(CanDistFromScipy):
         return (self.alpha, self.beta)
 
 
+class Chisq(CanDistFromScipy):
+
+    _metadata = {
+        "name": "Chi Squared",
+        "pdf_tex": (r"p(x; k)="
+                    + r"\frac{x^{k/2 - 1} e^{-x/2}}{2^{k/2} \Gamma(k/2)}"
+                    + "\n ;" r"x > 0"),
+
+        "cdf_tex": (r"\frac{1}{\Gamma \left(\frac{k}{2} \right)}" +
+                    r"\gamma \left(\frac{k}{2}, \frac{x}{2} \right)"
+                    + "\n\n"
+                    + r"where :math:`\gamma(\cdot, \cdot)`"
+                    + " is the lower incomplete"
+                    + " gamma function"),
+
+        "param_names": ["k"],
+
+        "param_descrs": ["Degrees of Freedom"],
+
+        "_str": "ChiSquared(k=%.5f)"}
+
+    # set docstring
+    __doc__ = _create_class_docstr(**_metadata)
+
+    def __init__(self, k):
+        self.k = k
+
+        # set dist before calling super's __init__
+        self.dist = st.chi2(df=k)
+        super(Chisq, self).__init__()
+
+    @property
+    def params(self):
+        return (self.k)
+
+
+Chi2 = Chisq
+
+
 class Chi(CanDistFromScipy):
 
     _metadata = {
