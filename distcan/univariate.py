@@ -12,7 +12,8 @@ from scipy.special import gamma, gammaln
 from .scipy_wrap import CanDistFromScipy
 
 __all__ = ["InverseGamma", "Normal", "Gamma", "NormalInverseGamma", "T",
-           "TDist", "F", "FDist", "LogNormal"]
+           "TDist", "F", "FDist", "LogNormal", "Chisq", "Chi2", "Chi",
+           "Uniform"]
 
 univariate_class_docstr = r"""
 Construct a distribution representing {name} random variables. The pdf

@@ -112,7 +112,33 @@ Additionally, each distribution has the following properties (accessed as `dist_
 * `entropy`: the entropy of the distribution
 * `params` (not in scipy): return a tuple of the distributions parameters
 
+## Distributions currently implemented
+
+Univariate-continuous:
+
+* Chi
+* Chisq (also called Chi2)
+* F (also called FDist)
+* Gamma
+* InverseGamma
+* LogNormal
+* Normal
+* NormalInverseGamma
+* T (also called TDist)
+* Uniform
+
+Multivariate-continuous
+
+
+* MultivaraiteNormal
+
+Matrix Variate:
+
+* Wishart
+* InverseWishart
+
 ## Contributors
 
 * Spencer Lyon (spencer.lyon@stern.nyu.edu)
+* Chase Coleman (cc7768@gmail.com)
 
