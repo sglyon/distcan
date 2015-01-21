@@ -201,6 +201,38 @@ class Gamma(CanDistFromScipy):
         return (self.alpha, self.beta)
 
 
+class Chi(CanDistFromScipy):
+
+    _metadata = {
+        "name": "Chi",
+        "pdf_tex": (r"p(x; k)=\frac{1}{\Gamma(k/2)} 2^{1 - k/2}"
+                    + r"x^{k-1} e^{-x^2 / 2}" + "\n ;" r"x > 0"),
+
+        "cdf_tex": (r"P\left(k/2, x^2/2 \right)"
+                    + "\n \n"
+                    + "where :math:`P(k, x)` is the regularized Gamma "
+                    + "function"),
+
+        "param_names": ["k"],
+
+        "param_descrs": ["Degrees of Freedom"],
+
+        "_str": "Chi(k=%.5f)"}
+
+    # set docstring
+    __doc__ = _create_class_docstr(**_metadata)
+
+    def __init__(self, k):
+        self.k = k
+
+        # set dist before calling super's __init__
+        self.dist = st.chi(df=k)
+        super(Chi, self).__init__()
+
+    @property
+    def params(self):
+        return (self.k)
+
 # ########################################################################## #
 # Below we have other distributions that are not a part of scipy.stats       #
 # ########################################################################## #
