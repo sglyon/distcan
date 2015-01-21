@@ -1,6 +1,10 @@
 from distutils.core import setup
 import os
 
+long_desc = 'Add a fallback short description here'
+if os.path.exists('README.txt'):
+    long_desc = open('README.txt').read()
+
 # Write a versions.py file for class attribute
 VERSION = "0.0.1"
 
@@ -32,4 +36,5 @@ setup(name="distcan",
       author="Spencer Lyon",
       author_email="spencer.lyon@stern.nyu.edu",
       url="https://github.com/spencerlyon2/distcan",  # URL to the github repo
-      keywords=["statistics", "distributions"])
+      keywords=["statistics", "distributions"],
+      long_description=long_desc)
