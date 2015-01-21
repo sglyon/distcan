@@ -5,13 +5,14 @@ Univariate distributions
 @date : 2015-01-07
 
 """
-from math import sqrt, log, pi
+from math import sqrt, log, pi, exp
 import numpy as np
 import scipy.stats as st
 from scipy.special import gamma, gammaln
 from .scipy_wrap import CanDistFromScipy
 
-__all__ = ["InverseGamma", "Normal", "Gamma", "NormalInverseGamma"]
+__all__ = ["InverseGamma", "Normal", "Gamma", "NormalInverseGamma", "T",
+           "TDist", "F", "FDist", "LogNormal"]
 
 univariate_class_docstr = r"""
 Construct a distribution representing {name} random variables. The pdf
@@ -88,6 +89,167 @@ def _create_class_docstr(name, param_names, param_descrs,
     param_attributes = str.join(", ", param_names) + " : See Parameters"
 
     return univariate_class_docstr.format(**locals())
+
+#  -  #
+#  T  #
+#  -  #
+
+
+class T(CanDistFromScipy):
+
+    _metadata = {
+        "name": "T",
+        "pdf_tex": (r"p(x;df)= \frac{1}{\sqrt{df} B\left(\frac{1}{2}, "
+                    + r"\frac{df}{2} \right)"
+                    + r"\left(1 + \frac{x^2}{df} \right)^{- \frac{df+1}{2}}"
+                    + "\n\n" + r"where :math:`B(\cdot)` is the beta function"),
+
+        "cdf_tex": (r"\frac{1}{2} + x \Gamma \left( \frac{df+1}{2}\right)"
+                    + r"\frac{2 F_1 \left( \frac{1}{2}, \frac{df+1}{2};"
+                    + r"\frac{3}{2}, \frac{-x^2}{df} \right)}"
+                    + r"{\sqrt{\pi df} \Gamma \left( \frac{df}{2}\right)}"
+                    + "\n\n"
+                    + r"where :math:`F_1` is the hypergeometric function"),
+
+        "param_names": ["df"],
+
+        "param_descrs": ["Degrees of freedom (real, >0)"],
+
+        "_str": "T(df=%.5f)"}
+
+    # set docstring
+    __doc__ = _create_class_docstr(**_metadata)
+
+    def __init__(self, df):
+        self.df = df
+
+        # set dist before calling super's __init__
+        self.dist = st.t(df)
+        super(T, self).__init__()
+
+    @property
+    def params(self):
+        return (self.df,)
+
+TDist = T
+
+
+#  -  #
+#  F  #
+#  -  #
+
+
+class F(CanDistFromScipy):
+
+    _metadata = {
+        "name": "F",
+        "pdf_tex": (r"p(x; d_1, d_2) = \frac{1}{x B(d_1/2, d_2/2)} "
+                    + r"\sqrt{\frac{(d_1 x)^{d_1} \cdot d_2^{d_2}}"
+                    + r"{(d_1 x + d_2)^{d_1 + d_2}}}"),
+
+        "cdf_tex": (r"I_{\frac{d_1 x}{d_1 x + d_2}} \left( \frac{d_1}{2},"
+                    + r" \frac{d_2}{2} \right)" + "\n\n where :math:`I` "
+                    + "is the regularized incomplete beta function"),
+
+        "param_names": ["d1", "d2"],
+
+        "param_descrs": ["Numerator degrees of freedom (must be >0)",
+                         "Denominator degrees of freedom (must be >0)"],
+
+        "_str": "F(d1=%.5f, d2=%.5f)"}
+
+    # set docstring
+    __doc__ = _create_class_docstr(**_metadata)
+
+    def __init__(self, d1, d2):
+        self.d1 = d1
+        self.d2 = d2
+
+        # set dist before calling super's __init__
+        self.dist = st.f(d1, d2)
+        super(F, self).__init__()
+
+    @property
+    def params(self):
+        return (self.d1, self.d2)
+
+FDist = F
+
+# ---- #
+# Beta #
+# ---- #
+
+
+class Beta(CanDistFromScipy):
+
+    _metadata = {
+        "name": "Beta",
+        "pdf_tex": (r"p(x; \alpha, \beta) = \frac{1}{B(\alpha, \beta)} "
+                    + r"x^{\alpha - 1} (1 - x)^{\beta - 1}, \quad x \in[0, 1]"
+                    ),
+
+        "cdf_tex": (r"I_{x}(\alpha, \beta)" + "\n\n where :math:`I` "
+                    + "is the incomplete beta function"),
+
+        "param_names": ["d1", "d2"],
+
+        "param_descrs": ["First shape parameter (must be >0)",
+                         "Second shape parameter (must be >0)"],
+
+        "_str": "Beta(alpha=%.5f, beta=%.5f)"}
+
+    # set docstring
+    __doc__ = _create_class_docstr(**_metadata)
+
+    def __init__(self, alpha, beta):
+        self.alpha = alpha
+        self.beta = beta
+
+        # set dist before calling super's __init__
+        self.dist = st.beta(alpha, beta)
+        super(Beta, self).__init__()
+
+    @property
+    def params(self):
+        return (self.alpha, self.beta)
+
+# --------- #
+# LogNormal #
+# --------- #
+
+
+class LogNormal(CanDistFromScipy):
+
+    _metadata = {
+        "name": "LogNormal",
+        "pdf_tex": (r"p(x; \mu, \sigma) = \frac{1}{x \sqrt{2 \pi \sigma^2}}"
+                    + r"\exp \left( - \frac{(\log(x) - \mu)^2}{2 \sigma^2}"
+                    + r" \right)"),
+
+        "cdf_tex": (r"\frac{1}{2} + \frac{1}{2} \text{erf} \left["
+                    + r"\frac{\log(x) - \mu }{\sqrt{2} \sigma}\right]"),
+
+        "param_names": ["mu", "sigma"],
+
+        "param_descrs": ["Log-scale (mean of log of RV)",
+                         "Shape parameter (must be >0, std. of log of RV)"],
+
+        "_str": "LogNormal(mu=%.5f, sigma=%.5f)"}
+
+    # set docstring
+    __doc__ = _create_class_docstr(**_metadata)
+
+    def __init__(self, mu, sigma):
+        self.mu = mu
+        self.sigma = sigma
+
+        # set dist before calling super's __init__
+        self.dist = st.lognorm(sigma, scale=exp(mu))
+        super(LogNormal, self).__init__()
+
+    @property
+    def params(self):
+        return (self.mu, self.sigma)
 
 #  ------------  #
 #  InverseGamma  #
