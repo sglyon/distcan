@@ -201,6 +201,10 @@ class Gamma(CanDistFromScipy):
         return (self.alpha, self.beta)
 
 
+#  ----------- #
+#  Chi Squared #
+#  ----------- #
+
 class Chisq(CanDistFromScipy):
 
     _metadata = {
@@ -239,6 +243,10 @@ class Chisq(CanDistFromScipy):
 
 Chi2 = Chisq
 
+
+#  --- #
+#  Chi #
+#  --- #
 
 class Chi(CanDistFromScipy):
 
