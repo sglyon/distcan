@@ -280,6 +280,43 @@ class Chi(CanDistFromScipy):
     def params(self):
         return (self.k)
 
+
+# ------- #
+# Uniform #
+# ------- #
+
+class Uniform(CanDistFromScipy):
+
+    _metadata = {
+        "name": "Uniform",
+        "pdf_tex": (r"p(x; a, b) = \frac{1}{b-a}; a \leq x \leq b"),
+
+        "cdf_tex": (r"0 \text{ for } x<a"
+                    + r"\frac{x-a}{b-a} \text{ for } a \leq x \leq b"
+                    + r"1 \text{ for } x > b"),
+
+        "param_names": ["a", "b"],
+
+        "param_descrs": ["Lower Bound", "Upper Bound"],
+
+        "_str": "Uniform(a=%.5f, b=%.5f)"}
+
+    # set docstring
+    __doc__ = _create_class_docstr(**_metadata)
+
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+
+        # set dist before calling super's __init__
+        self.dist = st.uniform(loc=a, scale=b)
+        super(Uniform, self).__init__()
+
+    @property
+    def params(self):
+        return (self.a, self.b)
+
+
 # ########################################################################## #
 # Below we have other distributions that are not a part of scipy.stats       #
 # ########################################################################## #
